@@ -1,0 +1,1 @@
+swissarmy package for commonly used Go functions.
