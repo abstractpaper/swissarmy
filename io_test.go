@@ -53,6 +53,51 @@ func TestAppendFile(t *testing.T) {
 	os.Remove(path)
 }
 
+// Test the following scenarios:
+// - Create + Insert
+// - Overwrite an existing file
+func TestNewFile(t *testing.T) {
+	path := "/tmp/swissarmy_test_new_file"
+	text := "so much text"
+
+	err := os.Remove(path)
+
+	// check if file exists
+	info, err := os.Stat(path)
+	exists := !os.IsNotExist(err) && !info.IsDir()
+	if !exists {
+		err = nil
+	}
+	assert.Equal(t, exists, false)
+
+	// test create + insert
+	err = NewFile(path, text)
+        assert.Nil(t, err)
+
+	// check if file exists
+	info, err = os.Stat(path)
+	exists = !os.IsNotExist(err) && !info.IsDir()
+	if !exists {
+		err = nil
+	}
+	assert.Equal(t, exists, true)
+
+	// check file contents
+	b, _ := ioutil.ReadFile(path)
+	assert.Equal(t, string(b), text)
+
+	// test append
+	err = NewFile(path, text) 
+        assert.Nil(t, err)
+
+	// check file contents
+	b, _ = ioutil.ReadFile(path)
+	assert.Equal(t, string(b), text)
+
+	// clean up
+	os.Remove(path)
+}
+
 func TestFileExists(t *testing.T) {
 	path := "/tmp/swissarmy_test_file_exists"
 
