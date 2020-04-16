@@ -1,9 +1,9 @@
-package swissarmy
+package io
 
 import (
+	"io/ioutil"
 	"os"
 	"testing"
-	"io/ioutil"
 
 	"github.com/stretchr/testify/assert"
 	// log "github.com/sirupsen/logrus"
@@ -72,7 +72,7 @@ func TestNewFile(t *testing.T) {
 
 	// test create + insert
 	err = NewFile(path, text)
-        assert.Nil(t, err)
+	assert.Nil(t, err)
 
 	// check if file exists
 	info, err = os.Stat(path)
@@ -87,8 +87,8 @@ func TestNewFile(t *testing.T) {
 	assert.Equal(t, string(b), text)
 
 	// test append
-	err = NewFile(path, text) 
-        assert.Nil(t, err)
+	err = NewFile(path, text)
+	assert.Nil(t, err)
 
 	// check file contents
 	b, _ = ioutil.ReadFile(path)

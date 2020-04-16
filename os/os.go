@@ -1,4 +1,4 @@
-package swissarmy
+package os
 
 import (
 	"os"

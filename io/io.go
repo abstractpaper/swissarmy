@@ -1,11 +1,11 @@
-package swissarmy
+package io
 
 import (
 	"io"
 	"os"
 )
 
-// AppendFile creates `path` if doesn't exist and inserts `text` into it, 
+// AppendFile creates `path` if doesn't exist and inserts `text` into it,
 // otherwise append `text` to `path`.
 func AppendFile(path string, text string) (err error) {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -21,7 +21,7 @@ func AppendFile(path string, text string) (err error) {
 	return
 }
 
-// NewFile creates `path` if doesn't exist and inserts `text` into it. 
+// NewFile creates `path` if doesn't exist and inserts `text` into it.
 func NewFile(path string, text string) (err error) {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
