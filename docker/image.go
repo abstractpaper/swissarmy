@@ -43,8 +43,8 @@ func BuildImage(ctx context.Context, cli *client.Client, path string, dockerFile
 
 // PushImage pushes a docker image to a registry.
 // Use full URLs for private registries (e.g. AWS ECR)
-func PushImage(ctx context.Context, cli *client.Client, image string, verbose bool) (err error) {
-	out, err := cli.ImagePush(ctx, image, types.ImagePushOptions{})
+func PushImage(ctx context.Context, cli *client.Client, image string, authToken string, verbose bool) (err error) {
+	out, err := cli.ImagePush(ctx, image, types.ImagePushOptions{RegistryAuth: authToken})
 	if err != nil {
 		log.Fatal(err)
 	}
