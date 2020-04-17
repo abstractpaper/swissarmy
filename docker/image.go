@@ -30,7 +30,7 @@ func BuildImage(ctx context.Context, cli *client.Client, path string, dockerFile
 	// build image
 	response, err := cli.ImageBuild(ctx, buildContext, opt)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	// read docker response
 	if verbose {
@@ -46,7 +46,7 @@ func BuildImage(ctx context.Context, cli *client.Client, path string, dockerFile
 func PushImage(ctx context.Context, cli *client.Client, image string, authToken string, verbose bool) (err error) {
 	out, err := cli.ImagePush(ctx, image, types.ImagePushOptions{RegistryAuth: authToken})
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	if verbose {
 		parseOutput(out)
