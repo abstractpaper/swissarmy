@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNew(t *testing.T) {
-	_, err := New("us-east-1", "test", "test")
+func TestNewSession(t *testing.T) {
+	_, err := NewSession("us-east-1", "test", "test")
 	assert.Nil(t, err)
 }
