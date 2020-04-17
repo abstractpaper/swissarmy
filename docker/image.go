@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"io"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -33,23 +34,42 @@ func BuildImage(ctx context.Context, cli *client.Client, path string, dockerFile
 	}
 	// read docker response
 	if verbose {
-		scanner := bufio.NewScanner(response.Body)
-		for scanner.Scan() {
-			bytes := []byte(scanner.Text())
-			data := make(map[string]interface{})
-			if err := json.Unmarshal(bytes, &data); err != nil {
-				log.Errorln("Can't process docker output")
-			}
-			// just get strings
-			if line, ok := data["stream"].(string); ok {
-				line := strings.ReplaceAll(line, "\n", "")
-				if line != "" {
-					log.Info(" > ", line)
-				}
-			}
-		}
+		parseOutput(response.Body)
 	}
 	response.Body.Close()
 
 	return
+}
+
+// PushImage pushes a docker image to a registry.
+// Use full URLs for private registries (e.g. AWS ECR)
+func PushImage(ctx context.Context, cli *client.Client, image string, verbose bool) (err error) {
+	out, err := cli.ImagePush(ctx, image, types.ImagePushOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if verbose {
+		parseOutput(out)
+	}
+	out.Close()
+
+	return
+}
+
+func parseOutput(body io.ReadCloser) {
+	scanner := bufio.NewScanner(body)
+	for scanner.Scan() {
+		bytes := []byte(scanner.Text())
+		data := make(map[string]interface{})
+		if err := json.Unmarshal(bytes, &data); err != nil {
+			log.Errorln("Can't process docker output")
+		}
+		// just get strings
+		if line, ok := data["stream"].(string); ok {
+			line := strings.ReplaceAll(line, "\n", "")
+			if line != "" {
+				log.Info(" > ", line)
+			}
+		}
+	}
 }
