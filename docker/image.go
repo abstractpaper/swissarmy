@@ -3,6 +3,7 @@ package docker
 import (
 	"bufio"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 
@@ -44,8 +45,15 @@ func BuildImage(ctx context.Context, cli *client.Client, path string, dockerFile
 
 // PushImage pushes a docker image to a registry.
 // Use full URLs for private registries (e.g. AWS ECR)
-func PushImage(ctx context.Context, cli *client.Client, image string, authToken string, verbose bool) (err error) {
-	out, err := cli.ImagePush(ctx, image, types.ImagePushOptions{RegistryAuth: authToken})
+func PushImage(ctx context.Context, cli *client.Client, image string, username string, password string, email string, verbose bool) (err error) {
+	bytes, _ := json.Marshal(map[string]string{
+		"username": username,
+		"password": password,
+		"email":    email,
+	})
+
+	token := base64.StdEncoding.EncodeToString(bytes)
+	out, err := cli.ImagePush(ctx, image, types.ImagePushOptions{RegistryAuth: token})
 	if err != nil {
 		log.Error(err)
 	}
