@@ -5,7 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"strings"
+
+	swissJSON "github.com/abstractpaper/swissarmy/json"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -64,12 +65,11 @@ func parseOutput(body io.ReadCloser) {
 		if err := json.Unmarshal(bytes, &data); err != nil {
 			log.Errorln("Can't process docker output")
 		}
-		// just get strings
-		if line, ok := data["stream"].(string); ok {
-			line := strings.ReplaceAll(line, "\n", "")
-			if line != "" {
-				log.Info(" > ", line)
-			}
-		}
+
+		swissJSON.Print(data, swissJSON.PrintOptions{
+			Prepend:          ">",
+			SkipEmptyStrings: true,
+			TrimStrings:      true,
+		})
 	}
 }

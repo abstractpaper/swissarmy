@@ -16,11 +16,10 @@ func AuthRegistry(ctx context.Context, cli *client.Client, username string, pass
 		Email:         email,
 		ServerAddress: server,
 	}
-	body, err := cli.RegistryLogin(ctx, config)
+	_, err = cli.RegistryLogin(ctx, config)
 	if err != nil {
 		log.Errorln("Error in authenticating with docker registry: ", err)
 	}
-	log.Infoln("RegistryLogin response: ", body.Status)
 
 	return
 }
