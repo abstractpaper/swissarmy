@@ -35,16 +35,14 @@ func BuildImage(ctx context.Context, cli *client.Client, path string, dockerFile
 		log.Error(err)
 	}
 	// read docker response
-	if verbose {
-		parseOutput(response.Body)
-	}
+	parseOutput(response.Body, verbose)
 	response.Body.Close()
 
 	return
 }
 
 // PushImage pushes a docker image to a registry.
-// Use full URLs for private registries (e.g. AWS ECR)
+// Use full URLs for private registries (e.g. AWS ECR).
 func PushImage(ctx context.Context, cli *client.Client, image string, username string, password string, email string, verbose bool) (err error) {
 	bytes, _ := json.Marshal(map[string]string{
 		"username": username,
@@ -57,27 +55,28 @@ func PushImage(ctx context.Context, cli *client.Client, image string, username s
 	if err != nil {
 		log.Error(err)
 	}
-	if verbose {
-		parseOutput(out)
-	}
+	parseOutput(out, verbose)
 	out.Close()
 
 	return
 }
 
-func parseOutput(body io.ReadCloser) {
+// Scan body until EOF.
+func parseOutput(body io.ReadCloser, print bool) {
 	scanner := bufio.NewScanner(body)
 	for scanner.Scan() {
-		bytes := []byte(scanner.Text())
-		data := make(map[string]interface{})
-		if err := json.Unmarshal(bytes, &data); err != nil {
-			log.Errorln("Can't process docker output")
-		}
+		if print {
+			bytes := []byte(scanner.Text())
+			data := make(map[string]interface{})
+			if err := json.Unmarshal(bytes, &data); err != nil {
+				log.Errorln("Can't process docker output")
+			}
 
-		swissJSON.Print(data, swissJSON.PrintOptions{
-			Prepend:          ">",
-			SkipEmptyStrings: true,
-			TrimStrings:      true,
-		})
+			swissJSON.Print(data, swissJSON.PrintOptions{
+				Prepend:          ">",
+				SkipEmptyStrings: true,
+				TrimStrings:      true,
+			})
+		}
 	}
 }
