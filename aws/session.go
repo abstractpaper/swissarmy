@@ -4,7 +4,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ecs"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,11 +16,5 @@ func NewSession(region string, accessKey string, secretKey string) (sess *sessio
 	if err != nil {
 		log.Errorln("Error creating a session: ", err)
 	}
-	return
-}
-
-// NewClient creates a new ECS client from a session.
-func NewClient(session *session.Session) (client *ecs.ECS) {
-	client = ecs.New(session)
 	return
 }
