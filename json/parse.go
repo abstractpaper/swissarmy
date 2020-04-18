@@ -33,6 +33,7 @@ func Print(obj map[string]interface{}, opt PrintOptions) {
 				text := v.(string)
 				if opt.TrimStrings {
 					text = strings.TrimSpace(text)
+					text = strings.ReplaceAll(text, "\n", "")
 				}
 				// either text is not empty
 				// or
