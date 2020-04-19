@@ -35,6 +35,7 @@ func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Contai
 
 	input := &ecs.RegisterTaskDefinitionInput{
 		ContainerDefinitions:    definitions,
+		ExecutionRoleArn:        aws.String("ecsTaskExecutionRole"),
 		Cpu:                     aws.String(task.CPU),
 		Memory:                  aws.String(task.Memory),
 		NetworkMode:             aws.String("awsvpc"),
