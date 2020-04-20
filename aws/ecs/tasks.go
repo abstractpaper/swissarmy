@@ -1,6 +1,8 @@
 package ecs
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ecs"
@@ -28,11 +30,19 @@ type Task struct {
 }
 
 // CreateTaskDefinition creates a task definition.
-func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Container, image string) {
+func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Container, image string, region string) {
 	definitions := []*ecs.ContainerDefinition{
 		{
 			Name:  aws.String(container.Name),
 			Image: aws.String(image),
+			LogConfiguration: &ecs.LogConfiguration{
+				LogDriver: aws.String("awslogs"),
+				Options: map[string]*string{
+					"awslogs-region":        aws.String(region),
+					"awslogs-group":         aws.String(fmt.Sprintf("ecs/%s", container.Name)),
+					"awslogs-stream-prefix": aws.String("ecs"),
+				},
+			},
 		},
 	}
 
