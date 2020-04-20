@@ -67,7 +67,7 @@ func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Contai
 }
 
 // RunTask runs a new task using a task definition.
-func RunTask(client *ecs.ECS, task Task) (err error) {
+func RunTask(client *ecs.ECS, task Task, containerName string, cmd []string) (err error) {
 	var publicIP *string
 	if task.PublicIP {
 		publicIP = aws.String("ENABLED")
@@ -83,6 +83,14 @@ func RunTask(client *ecs.ECS, task Task) (err error) {
 			AwsvpcConfiguration: &ecs.AwsVpcConfiguration{
 				AssignPublicIp: publicIP,
 				Subnets:        stringToPtr(task.Subnets),
+			},
+		},
+		Overrides: &ecs.TaskOverride{
+			ContainerOverrides: []*ecs.ContainerOverride{
+				{
+					Name:    aws.String(containerName),
+					Command: stringToPtr(cmd),
+				},
 			},
 		},
 	}
