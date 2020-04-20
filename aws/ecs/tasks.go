@@ -41,6 +41,7 @@ func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Contai
 					"awslogs-region":        aws.String(region),
 					"awslogs-group":         aws.String(fmt.Sprintf("ecs/%s", container.Name)),
 					"awslogs-stream-prefix": aws.String("ecs"),
+					"awslogs-create-group":  aws.String("true"),
 				},
 			},
 		},
