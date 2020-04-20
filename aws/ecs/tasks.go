@@ -24,18 +24,11 @@ type Task struct {
 	Cluster        string
 	TaskDefinition string
 	PublicIP       bool
-	SecurityGroups []string
 	Subnets        []string
 }
 
 // CreateTaskDefinition creates a task definition.
 func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Container, image string) {
-	// []string to []*string
-	var cmd []*string
-	for _, v := range container.CMD {
-		cmd = append(cmd, aws.String(v))
-	}
-
 	definitions := []*ecs.ContainerDefinition{
 		{
 			Name:  aws.String(container.Name),
@@ -74,10 +67,10 @@ func RunTask(client *ecs.ECS, task Task) (err error) {
 	input := &ecs.RunTaskInput{
 		Cluster:        aws.String(task.Cluster),
 		TaskDefinition: aws.String(task.TaskDefinition),
+		LaunchType:     aws.String("FARGATE"),
 		NetworkConfiguration: &ecs.NetworkConfiguration{
 			AwsvpcConfiguration: &ecs.AwsVpcConfiguration{
 				AssignPublicIp: publicIP,
-				SecurityGroups: stringToPtr(task.SecurityGroups),
 				Subnets:        stringToPtr(task.Subnets),
 			},
 		},

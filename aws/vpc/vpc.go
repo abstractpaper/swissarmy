@@ -1,8 +1,6 @@
 package vpc
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -108,12 +106,89 @@ func DeleteSubnet(client *ec2.EC2, subnetID string) (err error) {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			default:
-				fmt.Println(aerr.Error())
+				log.Errorln(aerr.Error())
 			}
 		} else {
 			// Print the error, cast err to awserr.Error to get the Code and
 			// Message from an error.
-			fmt.Println(err.Error())
+			log.Errorln(err.Error())
+		}
+		return
+	}
+
+	return
+}
+
+// CreateRouteTable creates a route table.
+func CreateRouteTable(client *ec2.EC2, vpcID string) (routeTable *ec2.RouteTable, err error) {
+	input := &ec2.CreateRouteTableInput{
+		VpcId: aws.String(vpcID),
+	}
+
+	result, err := client.CreateRouteTable(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				log.Errorln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			log.Errorln(err.Error())
+		}
+		return
+	}
+
+	routeTable = result.RouteTable
+
+	return
+}
+
+// CreateRoute creates a route in a route table
+func CreateRoute(client *ec2.EC2, destinationCIDR string, gatewayID string, routeTableId string) (err error) {
+	input := &ec2.CreateRouteInput{
+		DestinationCidrBlock: aws.String(destinationCIDR),
+		GatewayId:            aws.String(gatewayID),
+		RouteTableId:         aws.String(routeTableId),
+	}
+
+	_, err = client.CreateRoute(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				log.Errorln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			log.Errorln(err.Error())
+		}
+		return
+	}
+
+	return
+}
+
+// AssociateRouteTable associates a route table to a subnet.
+func AssociateRouteTable(client *ec2.EC2, routeTableID string, subnetID string) (err error) {
+	input := &ec2.AssociateRouteTableInput{
+		RouteTableId: aws.String(routeTableID),
+		SubnetId:     aws.String(subnetID),
+	}
+
+	_, err = client.AssociateRouteTable(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				log.Errorln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			log.Errorln(err.Error())
 		}
 		return
 	}
