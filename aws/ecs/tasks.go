@@ -136,7 +136,8 @@ func RunTask(client *ecs.ECS, task Task, containerName string, cmd []string) (er
 // stringToPtr: []string to []*string
 func stringToPtr(a []string) (b []*string) {
 	for _, v := range a {
-		b = append(b, &v)
+		copy := v
+		b = append(b, &copy)
 	}
 	return
 }
