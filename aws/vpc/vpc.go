@@ -170,11 +170,11 @@ func DeleteRouteTable(client *ec2.EC2, routeTableID string) (err error) {
 }
 
 // CreateRoute creates a route in a route table
-func CreateRoute(client *ec2.EC2, destinationCIDR string, gatewayID string, routeTableId string) (err error) {
+func CreateRoute(client *ec2.EC2, destinationCIDR string, gatewayID string, routeTableID string) (err error) {
 	input := &ec2.CreateRouteInput{
 		DestinationCidrBlock: aws.String(destinationCIDR),
 		GatewayId:            aws.String(gatewayID),
-		RouteTableId:         aws.String(routeTableId),
+		RouteTableId:         aws.String(routeTableID),
 	}
 
 	_, err = client.CreateRoute(input)
@@ -196,13 +196,39 @@ func CreateRoute(client *ec2.EC2, destinationCIDR string, gatewayID string, rout
 }
 
 // AssociateRouteTable associates a route table to a subnet.
-func AssociateRouteTable(client *ec2.EC2, routeTableID string, subnetID string) (err error) {
+func AssociateRouteTable(client *ec2.EC2, routeTableID string, subnetID string) (associationID string, err error) {
 	input := &ec2.AssociateRouteTableInput{
 		RouteTableId: aws.String(routeTableID),
 		SubnetId:     aws.String(subnetID),
 	}
 
-	_, err = client.AssociateRouteTable(input)
+	result, err := client.AssociateRouteTable(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				log.Errorln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			log.Errorln(err.Error())
+		}
+		return
+	}
+
+	associationID = *result.AssociationId
+
+	return
+}
+
+// DisassociateRouteTable disassociates a route table from a subnet.
+func DisassociateRouteTable(client *ec2.EC2, associationID string, subnetID string) (err error) {
+	input := &ec2.DisassociateRouteTableInput{
+		AssociationId: aws.String(associationID),
+	}
+
+	_, err = client.DisassociateRouteTable(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
