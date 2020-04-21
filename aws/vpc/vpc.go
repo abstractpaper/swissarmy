@@ -223,7 +223,7 @@ func AssociateRouteTable(client *ec2.EC2, routeTableID string, subnetID string) 
 }
 
 // DisassociateRouteTable disassociates a route table from a subnet.
-func DisassociateRouteTable(client *ec2.EC2, associationID string, subnetID string) (err error) {
+func DisassociateRouteTable(client *ec2.EC2, associationID string) (err error) {
 	input := &ec2.DisassociateRouteTableInput{
 		AssociationId: aws.String(associationID),
 	}
