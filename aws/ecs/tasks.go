@@ -67,7 +67,7 @@ func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Contai
 }
 
 // RunTask runs a new task using a task definition.
-func RunTask(client *ecs.ECS, task Task, containerName string, cmd []string) (err error) {
+func RunTask(client *ecs.ECS, task Task, containerName string, cmd []string) (ecsTasks []*ecs.Task, failures []*ecs.Failure, err error) {
 	var publicIP *string
 	if task.PublicIP {
 		publicIP = aws.String("ENABLED")
@@ -128,7 +128,46 @@ func RunTask(client *ecs.ECS, task Task, containerName string, cmd []string) (er
 		return
 	}
 
-	log.Info(result)
+	ecsTasks = result.Tasks
+	failures = result.Failures
+
+	return
+}
+
+// DescribeTask describes an ECS task.
+func DescribeTask(client *ecs.ECS, cluster string, taskARN string) (tasks []*ecs.Task, failures []*ecs.Failure, err error) {
+	input := &ecs.DescribeTasksInput{
+		Cluster: aws.String(cluster),
+		Tasks: []*string{
+			aws.String(taskARN),
+		},
+	}
+
+	result, err := client.DescribeTasks(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case ecs.ErrCodeServerException:
+				log.Errorln(ecs.ErrCodeServerException, aerr.Error())
+			case ecs.ErrCodeClientException:
+				log.Errorln(ecs.ErrCodeClientException, aerr.Error())
+			case ecs.ErrCodeInvalidParameterException:
+				log.Errorln(ecs.ErrCodeInvalidParameterException, aerr.Error())
+			case ecs.ErrCodeClusterNotFoundException:
+				log.Errorln(ecs.ErrCodeClusterNotFoundException, aerr.Error())
+			default:
+				log.Errorln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			log.Errorln(err.Error())
+		}
+		return
+	}
+
+	tasks = result.Tasks
+	failures = result.Failures
 
 	return
 }
