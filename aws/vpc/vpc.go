@@ -145,6 +145,30 @@ func CreateRouteTable(client *ec2.EC2, vpcID string) (routeTable *ec2.RouteTable
 	return
 }
 
+// DeleteRouteTable creates a route table.
+func DeleteRouteTable(client *ec2.EC2, routeTableID string) (err error) {
+	input := &ec2.DeleteRouteTableInput{
+		RouteTableId: aws.String(routeTableID),
+	}
+
+	_, err = client.DeleteRouteTable(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				log.Errorln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			log.Errorln(err.Error())
+		}
+		return
+	}
+
+	return
+}
+
 // CreateRoute creates a route in a route table
 func CreateRoute(client *ec2.EC2, destinationCIDR string, gatewayID string, routeTableId string) (err error) {
 	input := &ec2.CreateRouteInput{

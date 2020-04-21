@@ -30,7 +30,7 @@ type Task struct {
 }
 
 // CreateTaskDefinition creates a task definition.
-func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Container, image string, region string) {
+func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Container, image string, region string) (err error) {
 	definitions := []*ecs.ContainerDefinition{
 		{
 			Name:  aws.String(container.Name),
@@ -56,12 +56,10 @@ func CreateTaskDefinition(client *ecs.ECS, task TaskDefinition, container Contai
 		RequiresCompatibilities: []*string{aws.String("FARGATE")},
 		Family:                  aws.String(container.Name),
 	}
-	result, err := client.RegisterTaskDefinition(input)
+	_, err = client.RegisterTaskDefinition(input)
 	if err != nil {
 		log.Errorln(err)
 	}
-
-	log.Info(result)
 
 	return
 }
