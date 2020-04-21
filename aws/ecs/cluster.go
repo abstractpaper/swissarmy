@@ -36,7 +36,7 @@ func DeleteCluster(client *ecs.ECS, name string) (err error) {
 		Cluster: aws.String(name),
 	}
 
-	result, err := client.DeleteCluster(input)
+	_, err = client.DeleteCluster(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -67,6 +67,5 @@ func DeleteCluster(client *ecs.ECS, name string) (err error) {
 		return
 	}
 
-	log.Info("Deleted cluster ", result.Cluster.ClusterName)
 	return
 }
