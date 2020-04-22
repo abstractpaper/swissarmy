@@ -21,13 +21,13 @@ func AppendFile(path string, text string) (err error) {
 	return
 }
 
-// NewFile creates `path` if doesn't exist and inserts `text` into it.
-func NewFile(path string, text string) (err error) {
+// NewFile creates `path` if doesn't exist and inserts `data` into it.
+func NewFile(path string, data []byte) (err error) {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return
 	}
-	if _, err := f.Write([]byte(text)); err != nil {
+	if _, err := f.Write(data); err != nil {
 		return err
 	}
 	if err := f.Close(); err != nil {

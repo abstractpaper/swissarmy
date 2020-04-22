@@ -71,7 +71,7 @@ func TestNewFile(t *testing.T) {
 	assert.Equal(t, exists, false)
 
 	// test create + insert
-	err = NewFile(path, text)
+	err = NewFile(path, []byte(text))
 	assert.Nil(t, err)
 
 	// check if file exists
@@ -87,7 +87,7 @@ func TestNewFile(t *testing.T) {
 	assert.Equal(t, string(b), text)
 
 	// test append
-	err = NewFile(path, text)
+	err = NewFile(path, []byte(text))
 	assert.Nil(t, err)
 
 	// check file contents
