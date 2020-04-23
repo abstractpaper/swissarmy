@@ -18,7 +18,7 @@ func Retry(f func() error, interrupt chan os.Signal) {
 		select {
 		case <-interrupt:
 			log.Warn("Interrupt/kill signal received, quitting.")
-			os.Exit(1)
+			break
 		default:
 			// call f() if the current time passed retryTimestamp
 			if time.Now().After(retryTimestamp) {
