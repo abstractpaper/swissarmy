@@ -18,15 +18,14 @@ func Retry(f func() error, interrupt chan os.Signal) {
 		select {
 		case <-interrupt:
 			log.Warn("Interrupt/kill signal received, quitting.")
-			break
+			return
 		default:
 			// call f() if the current time passed retryTimestamp
 			if time.Now().After(retryTimestamp) {
 				err := f()
 				if err != nil {
+					// failed; retry.
 					log.Error(err)
-
-					// couldn't connect, retry.
 					log.Infof("Retrying in %d seconds", sleep)
 					retryTimestamp = time.Now().Add(sleep * time.Second)
 
