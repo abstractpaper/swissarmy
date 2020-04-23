@@ -170,6 +170,39 @@ func DescribeTask(client *ecs.ECS, cluster string, taskARN string) (tasks []*ecs
 	return
 }
 
+// StopTask stops a running ECS task.
+func StopTask(client *ecs.ECS, cluster string, taskARN string) (err error) {
+	input := &ecs.StopTaskInput{
+		Cluster: aws.String(cluster),
+		Task:    aws.String(taskARN),
+	}
+
+	_, err = client.StopTask(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case ecs.ErrCodeServerException:
+				log.Errorln(ecs.ErrCodeServerException, aerr.Error())
+			case ecs.ErrCodeClientException:
+				log.Errorln(ecs.ErrCodeClientException, aerr.Error())
+			case ecs.ErrCodeInvalidParameterException:
+				log.Errorln(ecs.ErrCodeInvalidParameterException, aerr.Error())
+			case ecs.ErrCodeClusterNotFoundException:
+				log.Errorln(ecs.ErrCodeClusterNotFoundException, aerr.Error())
+			default:
+				log.Errorln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			log.Errorln(err.Error())
+		}
+		return
+	}
+
+	return
+}
+
 // stringToPtr: []string to []*string
 func stringToPtr(a []string) (b []*string) {
 	for _, v := range a {
