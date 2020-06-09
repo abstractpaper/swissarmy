@@ -63,3 +63,19 @@ func ListFiles(base string) (files []string, err error) {
 	})
 	return
 }
+
+// TopLevelFiles returns a list of only top level files in path.
+func TopLevelFiles(path string) (files []string, err error) {
+	files, err = ListFiles(path)
+	// top level directory files
+	var topLevel []string
+	for _, file := range files {
+		// base/*
+		baseMatch := filepath.Join(path, "*")
+		if match, _ := filepath.Match(baseMatch, file); match {
+			topLevel = append(topLevel, file)
+		}
+	}
+	files = topLevel
+	return
+}

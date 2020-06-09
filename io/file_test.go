@@ -128,8 +128,29 @@ func TestListFiles(t *testing.T) {
 
 	// list files
 	files, _ := ListFiles(base)
-	fmt.Println("files: ", files)
 	assert.Equal(t, 2, len(files))
+
+	// clean up
+	os.RemoveAll(base)
+}
+
+func TestTopLevelFiles(t *testing.T) {
+	base := "/tmp/swissarmy_test_top_level_files/"
+	folder := fmt.Sprintf("%s/folder1/", base)
+	path1 := fmt.Sprintf("%s/file_1", base)
+	path2 := fmt.Sprintf("%s/file_2", folder)
+	path3 := fmt.Sprintf("%s/file_3", folder)
+
+	// create folder and files
+	os.Mkdir(base, 0777)
+	os.Mkdir(folder, 0777)
+	ioutil.WriteFile(path1, []byte("random text"), 0777)
+	ioutil.WriteFile(path2, []byte("random text"), 0777)
+	ioutil.WriteFile(path3, []byte("random text"), 0777)
+
+	// list files
+	files, _ := TopLevelFiles(base)
+	assert.Equal(t, 1, len(files))
 
 	// clean up
 	os.RemoveAll(base)
