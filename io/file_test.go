@@ -1,6 +1,7 @@
 package io
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -25,7 +26,7 @@ func TestAppendFile(t *testing.T) {
 	if !exists {
 		err = nil
 	}
-	assert.Equal(t, exists, false)
+	assert.Equal(t, false, exists)
 
 	// test create + insert
 	_ = AppendFile(path, text)
@@ -36,18 +37,18 @@ func TestAppendFile(t *testing.T) {
 	if !exists {
 		err = nil
 	}
-	assert.Equal(t, exists, true)
+	assert.Equal(t, true, exists)
 
 	// check file contents
 	b, _ := ioutil.ReadFile(path)
-	assert.Equal(t, string(b), text)
+	assert.Equal(t, text, string(b))
 
 	// test append
 	_ = AppendFile(path, append)
 
 	// check file contents
 	b, _ = ioutil.ReadFile(path)
-	assert.Equal(t, string(b), text+append)
+	assert.Equal(t, text+append, string(b))
 
 	// clean up
 	os.Remove(path)
@@ -68,7 +69,7 @@ func TestNewFile(t *testing.T) {
 	if !exists {
 		err = nil
 	}
-	assert.Equal(t, exists, false)
+	assert.Equal(t, false, exists)
 
 	// test create + insert
 	err = NewFile(path, []byte(text))
@@ -80,11 +81,11 @@ func TestNewFile(t *testing.T) {
 	if !exists {
 		err = nil
 	}
-	assert.Equal(t, exists, true)
+	assert.Equal(t, true, exists)
 
 	// check file contents
 	b, _ := ioutil.ReadFile(path)
-	assert.Equal(t, string(b), text)
+	assert.Equal(t, text, string(b))
 
 	// test append
 	err = NewFile(path, []byte(text))
@@ -92,7 +93,7 @@ func TestNewFile(t *testing.T) {
 
 	// check file contents
 	b, _ = ioutil.ReadFile(path)
-	assert.Equal(t, string(b), text)
+	assert.Equal(t, text, string(b))
 
 	// clean up
 	os.Remove(path)
@@ -104,51 +105,32 @@ func TestFileExists(t *testing.T) {
 	// test file doesn't exist
 	os.Remove(path)
 	exists, _ := FileExists(path)
-	assert.Equal(t, exists, false)
+	assert.Equal(t, false, exists)
 
 	// test file exists
 	ioutil.WriteFile(path, []byte("random text"), 0777)
 	exists, _ = FileExists(path)
-	assert.Equal(t, exists, true)
+	assert.Equal(t, true, exists)
 
 	// clean up
 	os.Remove(path)
 }
 
-func TestDirExists(t *testing.T) {
-	path := "/tmp/swissarmy_test_dir_exists/"
+func TestListFiles(t *testing.T) {
+	base := "/tmp/swissarmy_test_list_files/"
+	path1 := fmt.Sprintf("%s/file_1", base)
+	path2 := fmt.Sprintf("%s/file_2", base)
 
-	// test dir doesn't exist
-	os.RemoveAll(path)
-	exists, _ := DirExists(path)
-	assert.Equal(t, exists, false)
+	// create folder and files
+	os.Mkdir(base, 0777)
+	ioutil.WriteFile(path1, []byte("random text"), 0777)
+	ioutil.WriteFile(path2, []byte("random text"), 0777)
 
-	// test file exists
-	os.Mkdir(path, 0600)
-	exists, _ = DirExists(path)
-	assert.Equal(t, exists, true)
-
-	// clean up
-	os.RemoveAll(path)
-}
-
-func TestDirEmpty(t *testing.T) {
-	path := "/tmp/swissarmy_test_dir_empty"
-	file := path + "/test.txt"
-
-	// test not empty
-	os.RemoveAll(path)
-	os.Mkdir(path, 0777)
-	ioutil.WriteFile(file, []byte("random text"), 0777)
-	empty, _ := DirEmpty(path)
-	assert.Equal(t, empty, false)
-
-	// test empty
-	os.RemoveAll(path)
-	os.Mkdir(path, 0600)
-	empty, _ = DirEmpty(path)
-	assert.Equal(t, empty, true)
+	// list files
+	files, _ := ListFiles(base)
+	fmt.Println("files: ", files)
+	assert.Equal(t, 2, len(files))
 
 	// clean up
-	os.RemoveAll(path)
+	os.RemoveAll(base)
 }

@@ -1,8 +1,8 @@
 package io
 
 import (
-	"io"
 	"os"
+	"path/filepath"
 )
 
 // AppendFile creates `path` if doesn't exist and inserts `text` into it,
@@ -47,28 +47,19 @@ func FileExists(path string) (exists bool, err error) {
 	return
 }
 
-// DirExists checks whether path directory exists or not.
-func DirExists(path string) (exists bool, err error) {
-	info, err := os.Stat(path)
-	exists = !os.IsNotExist(err) && info.IsDir()
-	if !exists {
-		err = nil
-	}
+// ListFiles returns a list of all files in base
+func ListFiles(base string) (files []string, err error) {
+	err = filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
 
+		files = append(files, path)
+
+		return nil
+	})
 	return
-}
-
-// DirEmpty checks whether path directory is empty or not.
-func DirEmpty(path string) (bool, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return false, err
-	}
-	defer f.Close()
-
-	_, err = f.Readdirnames(1) // Or f.Readdir(1)
-	if err == io.EOF {
-		return true, nil
-	}
-	return false, err // Either not empty or error, suits both cases
 }
