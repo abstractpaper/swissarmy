@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 	"sync"
@@ -17,27 +18,35 @@ type Command struct {
 	Command string
 	// Prefix adds a prefix to printed stdout/stderr
 	Prefix string
-	// Verbose indicates whether to print stdout/stderr
-	Verbose bool
+	// Stream indicates whether to stream stdout/stderr to os.Stdout
+	Stream bool
+	// Stdio indicates whether to use os.Stdin/out/err
+	Stdio bool
 	// Logger used for logging
 	Logger *log.Logger
 }
 
-// ExecCmd executes `command` and returns its output.
-func ExecCmd(command *Command) (stdout []string, stderr []string, err error) {
+// Execute executes `Command` and returns its output.
+func (c *Command) Execute() (stdout []string, stderr []string, err error) {
 	var wg sync.WaitGroup
 	// pipes to capture stdout/err
 	var stdoutReader, stdoutWriter = io.Pipe()
 	var stderrReader, stderrWriter = io.Pipe()
 
 	// split command
-	args := strings.Split(command.Command, " ")
+	args := strings.Split(c.Command, " ")
 
 	cmd := exec.Command(args[0], args[1:]...)
 	// redirect stdout and stderr to pipe
-	if command.Verbose {
+	if c.Stream {
 		cmd.Stdout = stdoutWriter
 		cmd.Stderr = stderrWriter
+	}
+	// use os.Stdin/out/err
+	if c.Stdio {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
 	}
 
 	printer := func(r io.Reader, memory *[]string, logLevel func(args ...interface{})) {
@@ -45,8 +54,8 @@ func ExecCmd(command *Command) (stdout []string, stderr []string, err error) {
 		scanner := bufio.NewScanner(r)
 		for scanner.Scan() {
 			var text string
-			if command.Prefix != "" {
-				text = fmt.Sprintf("%s | %s", command.Prefix, scanner.Text())
+			if c.Prefix != "" {
+				text = fmt.Sprintf("%s | %s", c.Prefix, scanner.Text())
 			} else {
 				text = scanner.Text()
 			}
@@ -56,7 +65,7 @@ func ExecCmd(command *Command) (stdout []string, stderr []string, err error) {
 		wg.Done()
 	}
 
-	if command.Verbose {
+	if c.Stream {
 		go printer(stdoutReader, &stdout, log.Info)
 		go printer(stderrReader, &stderr, log.Error)
 	}
@@ -70,7 +79,7 @@ func ExecCmd(command *Command) (stdout []string, stderr []string, err error) {
 		return
 	}
 
-	if command.Verbose {
+	if c.Stream {
 		stdoutWriter.Close()
 		stderrWriter.Close()
 		wg.Wait()
